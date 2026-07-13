@@ -1,0 +1,17 @@
+import cors from "cors";
+import express from "express";
+
+import { healthRouter } from "./routes/health.ts";
+
+export const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.use("/api/health", healthRouter);
+
+app.use((request, response) => {
+ response.status(404).json({
+ error: "Not Found",
+ });
+});
