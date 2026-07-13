@@ -1,0 +1,23 @@
+{
+  "name": "ksbid",
+  "version": "1.0.0",
+  "description": "hackathon",
+  "homepage": "https://github.com/mightyGorg/KSBid#readme",
+  "bugs": {
+    "url": "https://github.com/mightyGorg/KSBid/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mightyGorg/KSBid.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
