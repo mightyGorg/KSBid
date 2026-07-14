@@ -1,11 +1,19 @@
-import { prisma } from "../prisma";
 import { Router } from "express";
+import { prisma } from "../prisma";
+import { EvidenceStatus } from "../../prisma/generated/prisma/enums";
 
 export const evidenceRouter = Router();
 
+const REVISABLE: EvidenceStatus[] = ["DRAFT", "CHANGES_REQUESTED", "APPROVED"];
+const EDITABLE: EvidenceStatus[] = ["DRAFT", "CHANGES_REQUESTED"];
+
 evidenceRouter.get("/evidence", async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId)
+    return res.status(401).json({ error: "Authentication required" });
+
   const evidence = await prisma.evidence.findMany({
-    where: { userId: req.user?.id },
+    where: { userId },
     include: { ksb: true },
     orderBy: { submittedAt: "desc" },
   });
@@ -14,14 +22,17 @@ evidenceRouter.get("/evidence", async (req, res) => {
 });
 
 evidenceRouter.post("/evidence", async (req, res) => {
-  const { ksbId, title, description } = (req.body || {}) as { ksbId: string; title: string; description: string };
+  const userId = req.user?.id;
+  if (!userId)
+    return res.status(401).json({ error: "Authentication required" });
+
+  const { title, description, ksbId } = req.body || {};
 
   if (!ksbId || !title || !description)
-    throw new Error("all fields are required");
+    return res.status(400).json({ error: "all fields are required" });
 
   const evidence = await prisma.evidence.create({
-    data: { userId: req.user?.id, ksbId, title, description },
+    data: { userId, ksbId, title, description },
   });
-
   res.status(201).json(evidence);
 });
