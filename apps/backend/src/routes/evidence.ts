@@ -78,3 +78,21 @@ evidenceRouter.delete("/evidence/:id", async (req, res) => {
   await prisma.evidence.delete({ where: { id: existing.id } });
   res.status(204).end();
 });
+
+evidenceRouter.post("/evidence/:id/submit", async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId)
+    return res.status(401).json({ error: "Authentication required" });
+
+  const result = await prisma.evidence.updateMany({
+    where: { id: req.params.id, userId, status: { in: EDITABLE } },
+    data: { status: "SUBMITTED", submittedAt: new Date() },
+  });
+  if (result.count === 0)
+    return res.status(400).json({ error: "Evidence cannot be submitted" });
+
+  const evidence = await prisma.evidence.findUnique({
+    where: { id: req.params.id },
+  });
+  res.json(evidence);
+});
