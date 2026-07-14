@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
+import { prisma } from "../prisma"
 
 export const loginRouter = Router();
 
@@ -7,13 +8,24 @@ loginRouter.post('/', (request, response) => {
     const { email, password } = request.body;
 
     // Simple hardcoded check (REMOVE WHEN DB IS SETUP LATER!)
-    if (email === 'test@example.com' && password === 'password123') {
-     
-      // This is the data (payload) we want to include in our JWT
+    try {
+      const user = await prisma.user.findUnique({
+        where: email
+      })
+      if (!user) {
+        return response.status(400).json( {message: "User not found"} )
+      }
+
+      const valid = await brypt.compare(password, user.password)
+
+      if (!valid) {
+        return response.status(401).json({ message: "Invalid password" })
+      }
+
       const payload = {
         userId: 1,
-        email: 'test@example.com',
-        role: 'user'
+        email: email,
+        role: user.role
       };
      
       // Create the JWT token
@@ -26,8 +38,8 @@ loginRouter.post('/', (request, response) => {
         message: 'Login successful',
         token: token
       });
-     
-    } else {
-      response.status(401).json({ message: 'Invalid credentials' });
+    } catch (e) {
+      return response.status(500).json({ message: e })
     }
+    } 
 })
