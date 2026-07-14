@@ -1,4 +1,4 @@
-import {prisma} from "../prisma"
+import { prisma } from "../prisma"
 import { Router } from "express";
 
 export const ksbsRouter = Router()

@@ -20,7 +20,7 @@ enum Role {
 enum KsbType {
   KNOWLEDGE
   SKILL
-  BEHAVIOR
+  BEHAVIOUR
 }
 
 enum EvidenceStatus {
@@ -71,6 +71,6 @@ model Evidence {
   pointsAwarded Int       @default(0)
   rewarded      Boolean   @default(false)
   submittedAt   DateTime?
-  reviewedById  String    @db.Uuid
+  reviewedById  String?   @db.Uuid
   ksb           Ksb       @relation(fields: [ksbId], references: [id])
 }
