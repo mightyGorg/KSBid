@@ -13,22 +13,13 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/health", healthRouter);
-app.use("/api", authenticateToken, ksbsRouter)
+app.use("/auth/login", loginRouter);
 
-app.use('/auth/login', loginRouter);
-
-app.use((request, response) => {
-    console.log(request)
-    response.status(404).json({
-    error: "Not Found",
-    })
-});
-app.use("/api", ksbsRouter);
-app.use("/api", evidenceRouter);
+app.use("/api", authenticateToken, ksbsRouter);
+app.use("/api", authenticateToken, evidenceRouter);
 
 app.use((request, response) => {
   response.status(404).json({
     error: "Not Found",
   });
 });
-
