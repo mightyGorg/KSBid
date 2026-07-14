@@ -36,3 +36,28 @@ evidenceRouter.post("/evidence", async (req, res) => {
   });
   res.status(201).json(evidence);
 });
+
+evidenceRouter.patch("/evidence/:id", async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId)
+    return res.status(401).json({ error: "Authentication required" });
+
+  const existing = await prisma.evidence.findUnique({
+    where: { id: req.params.id },
+  });
+  if (!existing || existing.userId !== userId)
+    return res.status(404).json({ error: "Evidence not found" });
+  if (!REVISABLE.includes(existing.status))
+    return res
+      .status(400)
+      .json({ error: "this evidence can no longer be edited" });
+
+  const status = existing.status === "APPROVED" ? "DRAFT" : existing.status;
+  const { title, description, ksbId } = req.body || {};
+
+  const updated = await prisma.evidence.update({
+    where: { id: existing.id },
+    data: { title, description, ksbId, status },
+  });
+  res.json(updated);
+});
