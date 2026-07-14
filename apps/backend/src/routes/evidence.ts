@@ -61,3 +61,20 @@ evidenceRouter.patch("/evidence/:id", async (req, res) => {
   });
   res.json(updated);
 });
+
+evidenceRouter.delete("/evidence/:id", async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId)
+    return res.status(401).json({ error: "Authentication required" });
+
+  const existing = await prisma.evidence.findUnique({
+    where: { id: req.params.id },
+  });
+  if (!existing || existing.userId !== userId)
+    return res.status(404).json({ error: "Evidence not found" });
+  if (existing.status !== "DRAFT")
+    return res.status(400).json({ error: "Only drafts can be deleted" });
+
+  await prisma.evidence.delete({ where: { id: existing.id } });
+  res.status(204).end();
+});
