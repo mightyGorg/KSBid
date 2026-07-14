@@ -11,3 +11,44 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum KsbType {
+  KNOWLEDGE
+  SKILL
+  BEHAVIOR
+}
+
+enum EvidenceStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  CHANGES_REQUESTED
+  REJECTED
+}
+
+enum ItemStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+enum ItemType {
+  PHYSICAL
+  DIGITAL
+}
+
+model User {
+  id  String @id @default(uuid())
+  email String @unique
+  name String
+  passwordHash String
+  points Int @default(0)
+  lifetimePoints Int @default(0)
+  role Role @default(USER)
+  avatar String?
+}
