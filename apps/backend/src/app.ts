@@ -21,7 +21,8 @@ app.use((request, response) => {
     console.log(request)
     response.status(404).json({
     error: "Not Found",
-    });
+    })
+});
 app.use("/api", ksbsRouter);
 app.use("/api", evidenceRouter);
 
