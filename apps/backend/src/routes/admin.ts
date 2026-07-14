@@ -3,8 +3,6 @@ import { prisma } from "../prisma";
 
 export const adminRouter = Router();
 
-const VALID_DECISIONS = ["APPROVED", "CHANGES_REQUESTED", "REJECTED"];
-
 adminRouter.use((req, res, next) => {
   if (req.user?.role !== "ADMIN") {
     return res.status(403).json({ error: "Admin access required" });
