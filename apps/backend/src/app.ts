@@ -2,9 +2,10 @@ import cors from "cors";
 import express from "express";
 
 import { healthRouter } from "./routes/health";
-import { loginRouter } from "./routes/login";
-import { ksbsRouter } from "./routes/ksbs.routes";
+import { ksbsRouter } from "./routes/ksbs";
+import { evidenceRouter } from "./routes/evidence";
 import { authenticateToken } from "./middleware/authMiddleware";
+import { loginRouter } from "./routes/login";
 
 export const app = express();
 
@@ -21,5 +22,12 @@ app.use((request, response) => {
     response.status(404).json({
     error: "Not Found",
     });
+app.use("/api", ksbsRouter);
+app.use("/api", evidenceRouter);
+
+app.use((request, response) => {
+  response.status(404).json({
+    error: "Not Found",
+  });
 });
 
