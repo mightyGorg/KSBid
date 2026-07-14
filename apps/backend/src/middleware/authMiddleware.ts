@@ -1,27 +1,27 @@
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
+import { isTokenBlocked } from "../tokenBlocklist";
 
 export const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
-  // Grab token from the authorization header
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  // If no token is provided, return an error
   if (!token) {
-    return res.status(401).json({
-      message: 'Unauthorized. No token provided.'
-    });
+    return res
+      .status(401)
+      .json({ message: "Unauthorized. No token provided." });
   }
+
+  if (isTokenBlocked(token)) {
+    return res
+      .status(401)
+      .json({ message: "Token has been invalidated. log in again." });
+  }
+
   try {
-    // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    req.user = decoded; // Save user info in the request
-
-    next(); // Continue to the next middleware or route
+    req.user = decoded;
+    next();
   } catch (error) {
-    return res.status(403).json({
-     message: 'Forbidden - Invalid or expired token',
-    });
+    return res.status(403).json({ message: "Invalid or expired token" });
   }
 };
