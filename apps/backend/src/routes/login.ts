@@ -1,10 +1,11 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import { prisma } from "../prisma"
+import bcrypt from 'bcrypt'
 
 export const loginRouter = Router();
 
-loginRouter.post('/', (request, response) => {
+loginRouter.post('/', async (request, response) => {
     const { email, password } = request.body;
 
     // Simple hardcoded check (REMOVE WHEN DB IS SETUP LATER!)
@@ -16,7 +17,7 @@ loginRouter.post('/', (request, response) => {
         return response.status(400).json( {message: "User not found"} )
       }
 
-      const valid = await brypt.compare(password, user.password)
+      const valid = await bcrypt.compare(password, user.passwordHash)
 
       if (!valid) {
         return response.status(401).json({ message: "Invalid password" })
@@ -41,5 +42,4 @@ loginRouter.post('/', (request, response) => {
     } catch (e) {
       return response.status(500).json({ message: e })
     }
-    } 
 })
