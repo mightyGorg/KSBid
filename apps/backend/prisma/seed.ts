@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { PrismaClient } from "./generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcrypt";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -35,12 +36,12 @@ const sampleKsbs = [
   },
   {
     code: "B1",
-    type: "BEHAVIOR" as const,
+    type: "BEHAVIOUR" as const,
     description: "Communicate technical trade-offs clearly with stakeholders.",
   },
   {
     code: "B2",
-    type: "BEHAVIOR" as const,
+    type: "BEHAVIOUR" as const,
     description: "Take ownership of code quality and continuous improvement.",
   },
 ];
@@ -58,6 +59,20 @@ async function main() {
   }
 
   console.log(`Seeded ${sampleKsbs.length} KSB records`);
+
+  const passwordHash = await bcrypt.hash("password123", 10);
+  await prisma.user.upsert({
+    where: { email: "test@example.com" },
+    update: {},
+    create: {
+      email: "test@example.com",
+      name: "Test User",
+      passwordHash,
+      role: "USER",
+    },
+  });
+
+  console.log("Seeded test user: test@example.com / password123");
 }
 
 main()
