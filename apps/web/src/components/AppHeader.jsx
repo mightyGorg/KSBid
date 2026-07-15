@@ -22,6 +22,7 @@ const AppHeader = () => {
             <NavLink to="/admin/queue" className={navClass}>Review Queue</NavLink>
           )}
           <NavLink to="/profile" className={navClass}>Profile</NavLink>
+          <NavLink to="/auction" className={navClass}>Auction</NavLink>
           <button type="button" className="tabs__signout" onClick={handleLogout}>
             Log out
           </button>
