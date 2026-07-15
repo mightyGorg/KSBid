@@ -1,54 +1,26 @@
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './AuthContext';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './AuthContext';
+import { ProtectedRoute, GuestRoute, AdminRoute } from './components/RouteGuards';
+import AppHeader from './components/AppHeader';
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
+import HomePage from './pages/HomePage';
+import EvidencePage from './pages/EvidencePage';
+import AdminQueuePage from './pages/AdminQueuePage';
+import ProfilePage from './pages/ProfilePage';
 import './App.css';
-
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
-};
-
-const GuestRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <Navigate to="/" replace /> : children;
-};
-
-const AppHeader = () => {
-  const { isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login', { replace: true });
-  };
-
-  return (
-    <header className="app-header" role="banner">
-      <a href="/" className="app-header__brand">KSBid</a>
-      {isAuthenticated && (
-        <button type="button" className="gel-button" onClick={handleLogout}>
-          Sign out
-        </button>
-      )}
-    </header>
-  );
-};
-
-const HomePage = () => (
-  <main className="app-main">
-    <h1 className="gel-great-primer-bold">Welcome to KSBid</h1>
-    <p>You are signed in.</p>
-  </main>
-);
 
 const AppRoutes = () => (
   <>
+    <a href="#main-content" className="skip-link">Skip to content</a>
     <AppHeader />
     <Routes>
       <Route path="/login"    element={<GuestRoute><LoginPage /></GuestRoute>} />
       <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
       <Route path="/"         element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+      <Route path="/evidence" element={<ProtectedRoute><EvidencePage /></ProtectedRoute>} />
+      <Route path="/profile"  element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/admin/queue" element={<AdminRoute><AdminQueuePage /></AdminRoute>} />
       <Route path="*"         element={<Navigate to="/" replace />} />
     </Routes>
   </>

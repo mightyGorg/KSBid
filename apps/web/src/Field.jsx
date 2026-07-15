@@ -1,8 +1,9 @@
 import { useId } from "react";
 
-const Field = ({ label, error, description, ...props }) => {
+const Field = ({ label, error, description, multiline, ...props }) => {
   const id = useId();
   const errorId = `${id}-error`;
+  const Control = multiline ? "textarea" : "input";
 
   return (
     <div className="gel-form__divider">
@@ -10,7 +11,7 @@ const Field = ({ label, error, description, ...props }) => {
         {label}
         {description && <small>{description}</small>}
       </label>
-      <input
+      <Control
         id={id}
         aria-describedby={error ? errorId : undefined}
         aria-invalid={error ? "true" : undefined}

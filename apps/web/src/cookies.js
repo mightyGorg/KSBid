@@ -1,5 +1,5 @@
 const KEY = "auth_token";
-const AGE = 3600; // 1 h — matches JWT expiry
+const AGE = 3600;
 
 export const getToken = () => {
   const m = document.cookie.match(new RegExp(`(?:^|; )${KEY}=([^;]*)`));

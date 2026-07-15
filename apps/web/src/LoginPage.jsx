@@ -26,7 +26,11 @@ const LoginPage = () => {
   };
 
   return (
-    <main style={{ maxWidth: "40ch", margin: "4rem auto", padding: "0 1rem" }}>
+    <main
+      id="main-content"
+      tabIndex={-1}
+      style={{ maxWidth: "40ch", margin: "4rem auto", padding: "0 1rem" }}
+    >
       <h1 className="gel-great-primer-bold">Sign in</h1>
       <form onSubmit={handleSubmit} noValidate>
         <Field

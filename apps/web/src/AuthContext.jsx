@@ -1,8 +1,16 @@
 import { createContext, useContext, useState } from "react";
-import { authApi, apiFetch } from "./api";
+import { loginUser, registerUser, logoutUser } from "./api";
 import { getToken, setToken, clearToken } from "./cookies";
 
 const Ctx = createContext(null);
+
+const roleFromToken = (token) => {
+  try {
+    return JSON.parse(atob(token.split(".")[1])).role ?? null;
+  } catch {
+    return null;
+  }
+};
 
 export const AuthProvider = ({ children }) => {
   const [token, setTokenState] = useState(getToken);
@@ -13,33 +21,27 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) =>
-    store((await authApi.login(email, password)).token);
+    store((await loginUser(email, password)).token);
   const register = async (email, password, name) =>
-    store((await authApi.register(email, password, name)).token);
+    store((await registerUser(email, password, name)).token);
   const logout = async () => {
     try {
-      await authApi.logout(token);
+      await logoutUser(token);
     } finally {
       clearToken();
       setTokenState(null);
     }
   };
 
-  const authFetch = (path, opts = {}) =>
-    apiFetch(path, {
-      ...opts,
-      headers: { ...opts.headers, Authorization: `Bearer ${token}` },
-    });
-
   return (
     <Ctx.Provider
       value={{
         token,
         isAuthenticated: !!token,
+        isAdmin: roleFromToken(token) === "ADMIN",
         login,
         register,
         logout,
-        authFetch,
       }}
     >
       {children}
