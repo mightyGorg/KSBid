@@ -95,31 +95,35 @@ export const AuctionPage = () => {
               {item.status}
             </span>
           </div>
-
           {item.description && <p>{item.description}</p>}
-
+          {item.imageUrl && (
+            <img
+              src={item.imageUrl}
+              alt={item.title || "Auction item"}
+              style={{
+                maxWidth: "100%",
+                height: "auto",
+                borderRadius: "8px",
+              }}
+            />
+          )}
           <p>
             <strong>Current bid:</strong> {item.currentBid ?? "No bids yet"}
           </p>
-
           <p>
             <strong>Leader:</strong> {item.leader?.name ?? "None"}
           </p>
-
           <p>
             <strong>Minimum next bid:</strong> {item.nextMinimumBid}
           </p>
-
           <p>
             <strong>Closes:</strong> {new Date(item.closesAt).toLocaleString()}
           </p>
-
           {item.status === "CLOSED" && item.winner && (
             <p>
               <strong>Winner:</strong> {item.winner.name}
             </p>
           )}
-
           {item.status === "OPEN" && (
             <BidForm item={item} token={token} onSuccess={load} />
           )}
