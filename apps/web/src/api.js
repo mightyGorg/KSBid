@@ -10,10 +10,11 @@ const parse = async (res) => {
 const auth = (token) => (token ? { Authorization: `Bearer ${token}` } : {});
 
 const get = (path, token) => {
-  const response = fetch(`${BASE}${path}`, { headers: auth(token) }).then(parse);
-  return response
-}
-
+  const response = fetch(`${BASE}${path}`, { headers: auth(token) }).then(
+    parse,
+  );
+  return response;
+};
 
 const post = (path, body, token) =>
   fetch(`${BASE}${path}`, {
@@ -30,7 +31,9 @@ const patch = (path, body, token) =>
   }).then(parse);
 
 const del = (path, token) =>
-  fetch(`${BASE}${path}`, { method: "DELETE", headers: auth(token) }).then(parse);
+  fetch(`${BASE}${path}`, { method: "DELETE", headers: auth(token) }).then(
+    parse,
+  );
 
 export const loginUser = (email, password) =>
   post("/auth/login", { email, password });
@@ -54,8 +57,7 @@ export const createEvidence = (token, evidence) =>
 export const updateEvidence = (token, id, evidence) =>
   patch(`/api/evidence/${id}`, evidence, token);
 
-export const deleteEvidence = (token, id) =>
-  del(`/api/evidence/${id}`, token);
+export const deleteEvidence = (token, id) => del(`/api/evidence/${id}`, token);
 
 export const submitEvidence = (token, id) =>
   post(`/api/evidence/${id}/submit`, {}, token);
@@ -65,25 +67,10 @@ export const getReviewQueue = (token) => get("/api/admin/queue", token);
 export const reviewEvidence = (token, id, review) =>
   post(`/api/admin/evidence/${id}/review`, review, token);
 
-export const listAuctionItems = async (token) => {
-  const response = await get("/api/auction", token);
-  console.log(response)
-  return response
-}
+export const listAuctionItems = (token) => get("/api/items", token);
 
-export const listBidsForItem = (token, itemId) =>
-  get(`/api/auction/${itemId}/bids`, token);
+export const getAuctionItem = (token, itemId) =>
+  get(`/api/items/${itemId}`, token);
 
-export const createAuctionItem = (token, item) =>
-  post("/api/auction", item, token);
-
-export const updateAuctionItem = (token, id, item) =>
-  patch(`/api/auction/${id}`, item, token);
-
-export const deleteAuctionItem = (token, id) =>
-  del(`/api/auction/${id}`, token);
-
-export const placeBid = (token, itemId, bid) =>
-  post(`/api/auction/${itemId}/bids`, bid, token);
-
-
+export const placeBid = (token, itemId, amount) =>
+  post(`/api/items/${itemId}/bid`, { amount }, token);

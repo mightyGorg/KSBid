@@ -72,7 +72,52 @@ async function main() {
     });
   }
 
-  console.log(`Seeded ${users.length} users and ${ksbs.length} KSBs`);
+  await prisma.item.deleteMany();
+
+  await prisma.item.createMany({
+    data: [
+      {
+        name: "Some avatar",
+        description: "A mystery reward.",
+        imageUrl: "http://localhost:5173/KSBid-signature.png",
+        minimumBid: 50,
+        kind: "DIGITAL",
+        status: "OPEN",
+        closesAt: new Date("2026-12-31T23:59:59Z"),
+      },
+      {
+        name: "Anotha avatar",
+        description: "A premium mystery reward.",
+        imageUrl: "http://localhost:5173/KSBid-signature-2.png",
+        minimumBid: 150,
+        kind: "DIGITAL",
+        status: "OPEN",
+        closesAt: new Date("2026-12-31T23:59:59Z"),
+      },
+      {
+        name: "Avatar 3",
+        description: "A special mystery reward.",
+        imageUrl: "http://localhost:5173/Wallpaper.png",
+        minimumBid: 300,
+        kind: "DIGITAL",
+        status: "OPEN",
+        closesAt: new Date("2026-12-31T23:59:59Z"),
+      },
+      {
+        name: "Avatarrrrr",
+        description: "A special mystery reward.",
+        imageUrl: "http://localhost:5173/Wallpaper-2.png",
+        minimumBid: 300,
+        kind: "DIGITAL",
+        status: "OPEN",
+        closesAt: new Date("2026-12-31T23:59:59Z"),
+      },
+    ],
+  });
+
+  console.log(
+    `Seeded ${users.length} users, ${ksbs.length} KSBs and 3 auction items`,
+  );
   console.log(`Login with admin@ksbid.dev or user@ksbid.dev / ${PASSWORD}`);
 }
 

@@ -21,7 +21,6 @@ app.use("/auth", authRouter);
 app.use("/api", authenticateToken, meRouter);
 app.use("/api", authenticateToken, ksbsRouter);
 app.use("/api", authenticateToken, evidenceRouter);
-app.use("/api", authenticateToken, itemsRouter);
 app.use("/api/items", authenticateToken, itemsRouter);
 app.use("/api/admin", authenticateToken, adminRouter);
 app.use((request, response) => {
