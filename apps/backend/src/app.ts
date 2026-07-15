@@ -6,7 +6,7 @@ import { ksbsRouter } from "./routes/ksbs";
 import { evidenceRouter } from "./routes/evidence";
 import { authenticateToken } from "./middleware/authMiddleware";
 import { authRouter } from "./routes/auth";
-import { itemsRouter } from "./routes/items";
+import { itemsRouter } from "./routes/auctions";
 import { adminRouter } from "./routes/admin";
 import { meRouter } from "./routes/me";
 
