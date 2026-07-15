@@ -70,9 +70,47 @@ model Evidence {
   pointsAwarded Int            @default(0)
   rewarded      Boolean        @default(false)
   submittedAt   DateTime?
+<<<<<<< Updated upstream
   reviewedById  String?        @db.Uuid
 
   user       User  @relation("EvidenceOwner", fields: [userId], references: [id], onDelete: Cascade)
   ksb        Ksb   @relation(fields: [ksbId], references: [id])
   reviewedBy User? @relation("EvidenceReviewer", fields: [reviewedById], references: [id])
+=======
+  reviewedById  String?   @db.Uuid
+  ksb           Ksb       @relation(fields: [ksbId], references: [id])
+}
+
+model Item {
+  id           String     @id @default(uuid()) @db.Uuid
+  name         String
+  description  String?
+  imageUrl     String?
+  minimumBid   Int        @default(1)
+  closesAt     DateTime
+  status       ItemStatus @default(OPEN)
+  kind         ItemType   @default(PHYSICAL)
+  winningBidId String?    @unique @db.Uuid
+  bids         Bid[]      @relation("ItemBids")
+
+  winningBid Bid? @relation("WinningBid", fields: [winningBidId], references: [id])
+
+  @@index([status, closesAt])
+  @@map("items")
+}
+
+model Bid {
+  id       String   @id @default(uuid()) @db.Uuid
+  itemId   String   @db.Uuid
+  userId   String   @db.Uuid
+  amount   Int
+  placedAt DateTime @default(now())
+
+  item       Item  @relation("ItemBids", fields: [itemId], references: [id], onDelete: Cascade)
+  user       User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  winningFor Item? @relation("WinningBid")
+
+  @@index([itemId, amount, placedAt])
+  @@map("bids")
+>>>>>>> Stashed changes
 }

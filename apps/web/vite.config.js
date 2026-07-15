@@ -8,10 +8,13 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+<<<<<<< Updated upstream
   server: {
     proxy: {
       '/auth': 'http://localhost:3000',
       '/api': 'http://localhost:3000',
     },
   },
+=======
+>>>>>>> Stashed changes
 })

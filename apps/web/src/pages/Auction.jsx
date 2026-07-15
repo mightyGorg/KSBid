@@ -1,97 +1,37 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../AuthContext";
-import {
-  listAuctionItems,
-  listBidsForItem,
-  createAuctionItem,
-  updateAuctionItem,
-  deleteAuctionItem,
-  placeBid,
-} from "../api";
+import { listAuctionItems, placeBid } from "../api";
 import Field from "../Field";
 
-const EMPTY_ITEM = { title: "", description: "", startingPrice: "" };
-
-const ItemFields = ({ value, onChange, idPrefix }) => (
-  <>
-    <Field
-      label="Title"
-      value={value.title}
-      onChange={onChange("title")}
-      required
-    />
-    <Field
-      label="Description"
-      value={value.description}
-      onChange={onChange("description")}
-      multiline
-      rows={4}
-      required
-    />
-    <Field
-      label="Starting Price (£)"
-      value={value.startingPrice}
-      onChange={onChange("startingPrice")}
-      required
-    />
-  </>
-);
-
-//const EditItemForm = ({ token, item, onDone, onCancel }) => {
-//  const [form, setForm] = useState({
-//    title: item.title,
-//    description: item.description,
-//    startingPrice: item.startingPrice,
-//  });
-//  const [error, setError] = useState("");
-//  const [busy, setBusy] = useState(false);
-//
-//  const update = (key) => (e) => setForm({ ...form, [key]: e.target.value });
-//
-//  const handleSubmit = async (e) => {
-//    e.preventDefault();
-//    setError("");
-//    setBusy(true);
-//    try {
-//      await updateAuctionItem(token, item.id, form);
-//      await onDone();
-//    } catch (err) {
-//      setError(err.message);
-//      setBusy(false);
-//    }
-//  };
-//
-//  return (
-//    <form onSubmit={handleSubmit} noValidate style={{ marginTop: "0.75rem" }}>
-//      <ItemFields value={form} onChange={update} idPrefix={item.id} />
-//      {error && (
-//        <p className="gel-form__warning" role="alert">{error}</p>
-//      )}
-//      <div style={{ marginTop: "1rem", display: "flex", gap: "0.75rem" }}>
-//        <button type="submit" className="gel-button" disabled={busy}>
-//          {busy ? "Saving…" : "Save changes"}
-//        </button>
-//        <button type="button" className="gel-button" onClick={onCancel}>
-//          Cancel
-//        </button>
-//      </div>
-//    </form>
-//  );
-//};
-
-const BidForm = ({ token, itemId, onPlaced }) => {
+const BidCard = ({ item, token, onRefresh }) => {
   const [amount, setAmount] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const handleBid = async (e) => {
+  const minimumBid =
+    Number(item.currentBid ?? item.startingPrice) + 1;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError("");
+
+    if (Number(amount) <= Number(item.currentBid ?? item.startingPrice)) {
+      setError(
+        `Bid must be greater than £${item.currentBid ?? item.startingPrice}`
+      );
+      return;
+    }
+
     setBusy(true);
+
     try {
-      await placeBid(token, itemId, { amount });
+      await placeBid(token, item.id, {
+        amount: Number(amount),
+      });
+
       setAmount("");
-      await onPlaced();
+      await onRefresh();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -100,154 +40,103 @@ const BidForm = ({ token, itemId, onPlaced }) => {
   };
 
   return (
-    <form onSubmit={handleBid} noValidate style={{ marginTop: "1rem" }}>
-      <Field
-        label="Your bid (£)"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        required
-      />
-      {error && (
-        <p className="gel-form__warning" role="alert">{error}</p>
-      )}
-      <button type="submit" className="gel-button" disabled={busy}>
-        {busy ? "Placing…" : "Place bid"}
-      </button>
-    </form>
+    <article className="evidence-card">
+      <h3>{item.title}</h3>
+
+      <p>{item.description}</p>
+
+      <p>
+        <strong>Starting Price:</strong> £{item.startingPrice}
+      </p>
+
+      <p>
+        <strong>Current Highest Bid:</strong> £
+        {item.currentBid ?? item.startingPrice}
+      </p>
+
+      <form onSubmit={handleSubmit}>
+        <Field
+          label="Your Bid (£)"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          required
+        />
+
+        {error && (
+          <p className="gel-form__warning" role="alert">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          className="gel-button"
+          disabled={busy}
+        >
+          {busy ? "Placing..." : `Bid £${minimumBid}+`}
+        </button>
+      </form>
+    </article>
   );
 };
 
-export const AuctionPage = () => {
+export default function AuctionPage() {
   const { token } = useAuth();
+
   const [items, setItems] = useState([]);
-  const [bids, setBids] = useState({});
-  const [form, setForm] = useState(EMPTY_ITEM);
-  const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
 
-  const loadItems = () => listAuctionItems(token).then(setItems);
+  const loadItems = async () => {
+    try {
+      setError("");
 
-  const loadBids = async (itemId) => {
-    const b = await listBidsForItem(token, itemId);
-    setBids((prev) => ({ ...prev, [itemId]: b }));
+      const data = await listAuctionItems(token);
+
+      setItems(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    loadItems().catch((err) => setError(err.message));
+    loadItems();
   }, [token]);
 
-  const update = (key) => (e) => setForm({ ...form, [key]: e.target.value });
-
-  const handleCreate = async (e) => {
-    e.preventDefault();
-    setError("");
-    setBusy(true);
-    try {
-      await createAuctionItem(token, form);
-      setForm(EMPTY_ITEM);
-      await loadItems();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    setError("");
-    try {
-      await deleteAuctionItem(token, id);
-      if (editingId === id) setEditingId(null);
-      await loadItems();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   return (
-    <main className="app-main" id="main-content" tabIndex={-1}>
-      <h1 className="gel-great-primer-bold">Auction Items</h1>
-      <h2 className="gel-pica-bold">Items available for bidding</h2>
-      {items.length === 0 && <p role="status">No auction items yet.</p>}
+    <main className="app-main">
+      <h1 className="gel-great-primer-bold">Auction</h1>
 
-      {items.map((item) => (
-        <article key={item.id} className="evidence-card">
-          <div className="evidence-card__meta">
-            <strong>{item.title}</strong>
-            <span className="evidence-status">
-              Starting at £{item.startingPrice}
-            </span>
-          </div>
+      {error && (
+        <p className="gel-form__warning" role="alert">
+          {error}
+        </p>
+      )}
 
-          {editingId === item.id ? (
-            <EditItemForm
-              token={token}
-              item={item}
-              onDone={async () => {
-                setEditingId(null);
-                await loadItems();
-              }}
-              onCancel={() => setEditingId(null)}
-            />
-          ) : (
-            <>
-              <p>{item.description}</p>
+      {loading && <p>Loading auction items...</p>}
 
-              <h3 className="gel-minion-bold" style={{ marginTop: "1rem" }}>
-                Bids
-              </h3>
+      {!loading && items.length === 0 && (
+        <p>No auction items available.</p>
+      )}
 
-              <button
-                type="button"
-                className="gel-button"
-                onClick={() => loadBids(item.id)}
-                style={{ marginBottom: "0.75rem" }}
-              >
-                Load bids
-              </button>
-
-              {bids[item.id]?.length > 0 ? (
-                <ul>
-                  {bids[item.id].map((b) => (
-                    <li key={b.id}>
-                      £{b.amount} — {b.bidderName}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No bids yet.</p>
-              )}
-
-              <BidForm
-                token={token}
-                itemId={item.id}
-                onPlaced={() => loadBids(item.id)}
-              />
-
-              <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.75rem" }}>
-                <button
-                  type="button"
-                  className="gel-button"
-                  onClick={() => setEditingId(item.id)}
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  className="gel-button"
-                  onClick={() => handleDelete(item.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </>
-          )}
-        </article>
-      ))}
+      <div
+        style={{
+          display: "grid",
+          gap: "1rem",
+        }}
+      >
+        {items.map((item) => (
+          <BidCard
+            key={item.id}
+            item={item}
+            token={token}
+            onRefresh={loadItems}
+          />
+        ))}
+      </div>
     </main>
   );
-};
-
-export default AuctionPage;
+}
  
