@@ -13,66 +13,67 @@ const prisma = new PrismaClient({
   adapter: new PrismaPg({ connectionString }),
 });
 
-const sampleKsbs = [
+const PASSWORD = "password123";
+
+const users = [
+  { email: "admin@ksbid.dev", name: "Admin User", role: "ADMIN" as const },
+  { email: "user@ksbid.dev", name: "Test User", role: "USER" as const },
+];
+
+const ksbs = [
   {
     code: "K1",
     type: "KNOWLEDGE" as const,
-    description: "Understand core principles of secure software development.",
+    description: "TO DO.",
   },
   {
     code: "K2",
     type: "KNOWLEDGE" as const,
-    description: "Explain database normalization and indexing strategies.",
+    description: "TO DO.",
   },
   {
     code: "S1",
     type: "SKILL" as const,
-    description: "Implement REST API endpoints with validation and error handling.",
+    description: "TO DO.",
   },
   {
     code: "S2",
     type: "SKILL" as const,
-    description: "Write automated tests for service and route layers.",
+    description: "TO DO.",
   },
   {
     code: "B1",
     type: "BEHAVIOUR" as const,
-    description: "Communicate technical trade-offs clearly with stakeholders.",
+    description: "TO DO.",
   },
   {
     code: "B2",
     type: "BEHAVIOUR" as const,
-    description: "Take ownership of code quality and continuous improvement.",
+    description: "TO DO.",
   },
 ];
 
 async function main() {
-  for (const ksb of sampleKsbs) {
+  const passwordHash = await bcrypt.hash(PASSWORD, 10);
+
+  for (const user of users) {
+    await prisma.user.upsert({
+      where: { email: user.email },
+      update: { name: user.name, role: user.role },
+      create: { ...user, passwordHash },
+    });
+  }
+
+  for (const ksb of ksbs) {
     await prisma.ksb.upsert({
       where: { code: ksb.code },
-      update: {
-        type: ksb.type,
-        description: ksb.description,
-      },
+      update: { type: ksb.type, description: ksb.description },
       create: ksb,
     });
   }
 
-  console.log(`Seeded ${sampleKsbs.length} KSB records`);
-
-  const passwordHash = await bcrypt.hash("password123", 10);
-  await prisma.user.upsert({
-    where: { email: "test@example.com" },
-    update: {},
-    create: {
-      email: "test@example.com",
-      name: "Test User",
-      passwordHash,
-      role: "USER",
-    },
-  });
-
-  console.log("Seeded test user: test@example.com / password123");
+  console.log(`Seeded ${users.length} users and ${ksbs.length} KSBs`);
+  console.log(`Login with admin@ksbid.dev or user@ksbid.dev / ${PASSWORD}`);
 }
 
 main()
