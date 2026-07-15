@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage';
 import EvidencePage from './pages/EvidencePage';
 import AdminQueuePage from './pages/AdminQueuePage';
 import ProfilePage from './pages/ProfilePage';
+import { AuctionPage } from './pages/Auction';
 import './App.css';
 
 const AppRoutes = () => (
@@ -22,6 +23,7 @@ const AppRoutes = () => (
       <Route path="/profile"  element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/admin/queue" element={<AdminRoute><AdminQueuePage /></AdminRoute>} />
       <Route path="*"         element={<Navigate to="/" replace />} />
+      <Route path="/auction" element={<ProtectedRoute><AuctionPage /></ProtectedRoute>} />
     </Routes>
   </>
 );

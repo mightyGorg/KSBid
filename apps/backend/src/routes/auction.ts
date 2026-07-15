@@ -3,8 +3,10 @@ import { Router } from "express";
 
 export const itemsRouter = Router()
 
-itemsRouter.get('/', async (_, response) => {
+itemsRouter.get('/', async (request, response) => {
+  console.log(request)
   const items = await prisma.item.findMany()
+  console.log(items)
   response.json(items) 
 })
 

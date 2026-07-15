@@ -9,8 +9,11 @@ const parse = async (res) => {
 
 const auth = (token) => (token ? { Authorization: `Bearer ${token}` } : {});
 
-const get = (path, token) =>
-  fetch(`${BASE}${path}`, { headers: auth(token) }).then(parse);
+const get = (path, token) => {
+  const response = fetch(`${BASE}${path}`, { headers: auth(token) }).then(parse);
+  return response
+}
+
 
 const post = (path, body, token) =>
   fetch(`${BASE}${path}`, {
@@ -61,3 +64,26 @@ export const getReviewQueue = (token) => get("/api/admin/queue", token);
 
 export const reviewEvidence = (token, id, review) =>
   post(`/api/admin/evidence/${id}/review`, review, token);
+
+export const listAuctionItems = async (token) => {
+  const response = await get("/api/auction", token);
+  console.log(response)
+  return response
+}
+
+export const listBidsForItem = (token, itemId) =>
+  get(`/api/auction/${itemId}/bids`, token);
+
+export const createAuctionItem = (token, item) =>
+  post("/api/auction", item, token);
+
+export const updateAuctionItem = (token, id, item) =>
+  patch(`/api/auction/${id}`, item, token);
+
+export const deleteAuctionItem = (token, id) =>
+  del(`/api/auction/${id}`, token);
+
+export const placeBid = (token, itemId, bid) =>
+  post(`/api/auction/${itemId}/bids`, bid, token);
+
+
